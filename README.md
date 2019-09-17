@@ -4,44 +4,27 @@ Each weeks work understanding code will be posted here.
 >Your assignment each week will be to take the diffrent coding language posted above and read through it, and by intuition and what you >already know you can write notes on what you think it does, each week in class we'll discuss the piece of code and what it does, be >prepared to start the conversation by looking at your notes and asking a question about something in the code that you didn't >understand or wanted to know the meaning behind.
 
 
-# Calc.py This weeks code
+# Prime.py This weeks code
 
 ```py
-# Generally speaking, good developers/programmers write comments like the one you're reading now.
-# These comments are useful to get an overview or understand a more complex function.
-# In a way your job is to look at this code that I have removed the comments from 
-# and your notes will become your own comments on what the program does.
+#in this example you see a for loop, this is a function that is built into python
+#It allows something to be run multiple times until some condition is met
+#This is a program that will list prime numbers in a range.
 
 
 
+lower = 900
+upper = 1000
 
-def add(x, y):
-   return x + y
 
-def subtract(x, y):
-   return x - y
+print("Prime numbers between",lower,"and",upper,"are:")
 
-   return x * y
-
-def divide(x, y):
-   return x / y
-print("Select operation.")
-print("1.Add")
-print("2.Subtract")
-print("3.Multiply")
-print("4.Divide")
-
-choice = input("Enter choice(1/2/3/4):")
-num1 = int(input("Enter first number: "))
-num2 = int(input("Enter second number: "))
-if choice == '1':
-   print(num1,"+",num2,"=", add(num1,num2))
-elif choice == '2':
-   print(num1,"-",num2,"=", subtract(num1,num2))
-elif choice == '3':
-   print(num1,"*",num2,"=", multiply(num1,num2))
-elif choice == '4':
-   print(num1,"/",num2,"=", divide(num1,num2))
-else:
-   print("Invalid input")
+for num in range(lower,upper + 1):
+   # prime numbers are greater than 1
+   if num > 1:
+       for i in range(2,num):
+           if (num % i) == 0:
+               break
+       else:
+           print(num)
 ```
