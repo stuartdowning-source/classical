@@ -5,7 +5,30 @@ Each weeks work understanding code will be posted here.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/Zp5MuPOtsSY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-# Prime.py This weeks code
+# Grade.py
+```py
+def letterGrade(score):
+    if score >= 90:
+        letter = 'A'
+    else:   # grade must be B, C, D or F
+        if score >= 80:
+            letter = 'B'
+        else:  # grade must be C, D or F
+            if score >= 70:
+                letter = 'C'
+            else:    # grade must D or F
+                if score >= 60:
+                    letter = 'D'
+                else:
+                    letter = 'F'
+    return letter
+
+studentScore = input()
+print("The student's grade is: " + letterGrade(studentScore))
+```
+
+
+# Prime.py 
 
 ```py
 #in this example you see a for loop, this is a function that is built into python
