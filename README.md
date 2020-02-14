@@ -5,224 +5,288 @@ Each weeks work understanding code will be posted here.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/xfnRywBv5VM" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 # Game.py
-
 ```py
 import pygame as game
+import pygame_textinput
+import pygame.freetype
+import datetime
+import math
 
+white = (255,255,255)
+yellow = (255, 255, 0)
+black = (0,0,0)
+var = True
 #DeFinitions
-game.init()
+class ClassicalFreeze(object):
+	def __init__(self, x, y):
 
-window = game.display.set_mode((1080,720))
+		self.x = x
+		self.y = y
+		game.init()
+		self.window = game.display.set_mode((self.x, self.y))
+		game.display.set_caption("Clasical Freeze")
 
-game.display.set_caption("Clasical Freeze")
+		self.frameCount = 0
+
+		self.font = game.freetype.SysFont("Airal.ttf", 24)
+		self.time = 0
+		self.timestr = "00:00"
+		self.run = True
+	def quitLoop(self):
+		for event in game.event.get():
+			if event.type == game.QUIT:
+				self.run = False
+				return True
+			else:
+				return False
+
+GameClass = ClassicalFreeze(1080, 720)
+
+class Menu(object):
+	def __init__(self, loop):
+		GameClass.window.fill(black)
+		game.display.update()
+		self.i = 1
+		self.loop = loop
+
+	def MenuLoop(self):
+		for event in game.event.get():
+			if event.type == game.QUIT:
+				GameClass.run = False
+
+		key = game.key.get_pressed()
+		if key[game.K_k]:
+			self.loop = False
+		if key[game.K_w] and self.i > 0:
+			self.i -= 1
+		if key[game.K_s] and self.i < 2:
+			self.i += 1
+
+		s = 80
+		k = 90
+		distance = 30
+
+		GameClass.window.fill((0,0,0))
+		GameClass.font.render_to(GameClass.window, (1080/2 - 100, 20 + k + distance), "Classical Freeze", white)
+		distance += 30
+
+		if self.i == 0:
+			GameClass.font.render_to(GameClass.window, (1080/2 - s, 40 + k + distance), "Start", yellow)
+		else:
+			GameClass.font.render_to(GameClass.window, (1080/2 - s, 40 + k + distance), "Start", white)
+		distance += 30
+		if self.i == 1:
+			GameClass.font.render_to(GameClass.window, (1080/2 - s, 60 + k + distance), "Score Board", yellow)
+		else:
+			GameClass.font.render_to(GameClass.window, (1080/2 - s, 60 + k + distance), "Score Board", white)
+		distance += 30
+		if self.i == 2:
+			GameClass.font.render_to(GameClass.window, (1080/2 - s, 80 + k + distance), "Quit", yellow)
+		else:
+			GameClass.font.render_to(GameClass.window, (1080/2 - s, 80 + k + distance), "Quit", white)
+		game.display.update()
+	def noOp(self):
+		return True
+	def ScoreBoardLoop(self, score):
+		done = False
+
+		#while not done:
+			#GameClass.window.fill((255,255,255))
+			#events = pygame.event.get()
+			#textinput = pygame_textinput.TextInput()
+			# Feed it with events every frame
+			#if textinput.update(events):
+   			#	Done = True
+   			# Blit its surface onto the screen
+			#GameClass.window.blit(textinput.get_surface(), (10, 10))
 
 
-# x , y , w, h , reserved, speed
-player = [540, 360, 50, 50, 0, 5]
-enemy = [0, 0, 55, 55, 0, 3]
+
+		with open("score.txt", 'a', encoding = 'utf-8') as f:
+			f.write(GameClass.timestr + "\n")
+			f.close()
+
+
+		GameClass.window.fill((0,0,0))
+		file = open("score.txt", "r")
+		lines = file.readlines()
+		linNum = 60	
+		for line in lines:
+			linNum += 20
+			line = line.rstrip()                                                                                                                                                                                                                         
+			GameClass.font.render_to(GameClass.window, (1080/2 - 80, linNum), line, black)
+		file.close()
+
+		game.display.update()
+		GameClass.quitLoop()
+		
+		
+
+class powerup(object):
+	def __init__(self, x, y, w, h, on):
+		self.x = x
+		self.y = y
+		self.w = w
+		self.h = h
+		self.on = on
+
+	def Draw(self):
+		game.draw.rect(
+		GameClass.window,
+		(0,0,255),
+		(self.x, self.y, self.w, self.h))
+
+
+class enemy(object):
+	def __init__(self, x, y, w, h, r, s):
+		self.x = x
+		self.y = y
+		self.w = w
+		self.h = h
+		self.r = r
+		self.s = s
+
+	def DrawObject(self):
+		game.draw.rect(
+		GameClass.window,
+		(180, 0, 0),
+		(self.x, self.y, self.h, self.w))
+
+	def moveEnemy(self, Player):
+		#UP and to the LEFT
+		if self.x > Player.x:
+			self.x -= self.s
+		if self.y < Player.y:
+			self.y += self.s
+		#UP and to the RIGHT
+		if self.x < Player.x:
+			self.x += self.s
+		if self.y < Player.y:
+			self.y += self.s
+		#DOWN and to the LEFT
+		if self.x > Player.x:
+			self.x -= self.s
+		if self.y > Player.y:
+			self.y -= self.s
+		#DOWN and to the RIGHT
+		if self.x < Player.x:
+			self.x += self.s
+		if self.y > Player.y:
+			self.y -= self.s
+
+class player(object):
+	def __init__(self, x, y, w, h, r, s):
+		self.x = x
+		self.y = y
+		self.w = w
+		self.h = h
+		self.r = r
+		self.s = s
+	def movePlr(self):
+		key = game.key.get_pressed()
+
+		if self.s > 5:
+			self.s -= 0.01
+
+		if key[game.K_a] and self.x > 25:
+			self.x -= self.s
+			#self.x -= self.s
+
+		if key[game.K_d] and self.x < 1080 - self.w + 25:
+			self.x += self.s
+			#self.x += self.s
+
+		if key[game.K_w] and self.y > 25:
+			self.y -= self.s
+			#self.y -= self.s
+
+		if key[game.K_s] and self.y < 720 - self.h + 25:
+			self.y += self.s
+			#self.y += self.s
+		#game.time.delay(50)
+	def CollideWithObject(self, CollsionObject, bsize):
+		if (self.x - 25) >= (CollsionObject.x - 27) and (self.x - 25) <= (CollsionObject.x - 27) + bsize:
+			if (self.y - 25) >= (CollsionObject.y - 27)	and (self.y - 25)<= (CollsionObject.y - 27) + bsize:
+				return True
+			return False
+
+	def DrawObject(self):
+		game.draw.rect(
+		GameClass.window,
+		(0, 255, 0),
+		(self.x - 25, self.y - 25, self.h, self.w))
 
 
 
-enemyX = enemy[0]
-enemyY = enemy[1]
-enemyH = enemy[2]
-enemyW = enemy[3]
+#x
+#y
+#witdh
+#highet
+#Reserved (probabably Health)
+#speed
 
-playerX = player[0]
-playerY = player[1]
-playerH = player[2]
-playerW = player[3]
-#Definitions
 
-def movePlr():
-	global playerX
-	global playerY
-	global playerH
-	global playerW
+#Before game start definitons
+plr = player(540, 360, 50, 50, 0, 3)
+bad = enemy(0, 0, 55, 55, 0, 1)
+power = powerup(45, 35, 10, 10, True)
+power2 = powerup(100, 200, 10, 10, True)
+power3 = powerup(20, 80, 10, 10, True)
+power4 = powerup(30, 100, 10, 10, True)
 
-	key = game.key.get_pressed()
-	if key[game.K_a] and playerX > 25:
-		playerX -= player[5]
-		player[0] -= player[5]
+menu = Menu(True)
 
-	if key[game.K_d] and playerX < 1080 - playerW + 25:
-		playerX += player[5]
-		player[0] += player[5]
-
-	if key[game.K_w] and playerY > 25:
-		playerY -= player[5]
-		player[1] -= player[5]
-
-	if key[game.K_s] and playerY < 720 - playerH + 25:
-		playerY += player[5]
-		player[1] += player[5]
-
-def moveEnemy():
-	global enemyX
-	global enemyY
-	global enemyH
-	global enemyW
-
-	#UP and to the LEFT
-	if enemyX > player[0]:
-		if enemyY < player[1]:
-			enemy[0] -= enemy[5]
-			enemy[1] += enemy[5]
-	#UP and to the RIGHT
-	if enemyX < player[0]:
-		if enemyY < player[1]:
-			enemy[0] += enemy[5]
-		enemy[1] += enemy[5]
-	#DOWN and to the LEFT
-	if enemyX > player[0]:
-		if enemyY > player[1]:
-			enemy[0] -= enemy[5]
-			enemy[1] -= enemy[5]
-	#DOWN and to the RIGHT
-	if enemyX < player[0]:
-		if enemyY > player[1]:
-			enemy[0] += enemy[5]
-			enemy[1] -= enemy[5]
-
-def isCollision(x1,y1,x2,y2,bsize):
-    if x1 >= x2 and x1 <= x2 + bsize:
-        if y1 >= y2 and y1 <= y2 + bsize:
-            return True
-    return False
-
-run = True
-collide = False
-while(run):
+while(GameClass.run):
 	game.time.delay(10)
+	GameClass.frameCount += 1
 
-	for event in game.event.get():
-		if event.type == game.QUIT:
-			run = False
-	if collide:
-		run = False
-	playerX = player[0]
-	playerY = player[1]
-	playerH = player[2]
-	playerW = player[3]
+	GameClass.window.fill((0,0,0))
+	GameClass.quitLoop()
+	while menu.loop:
+		menu.MenuLoop()
 
-	enemyX = enemy[0]
-	enemyY = enemy[1]
-	enemyH = enemy[2]
-	enemyW = enemy[3]
-	movePlr()
-	moveEnemy()
+	plr.movePlr()
+	bad.moveEnemy(plr)
 
-	collide = isCollision(playerX - 25, playerY - 25, enemyX - 27, enemyY - 27, 85)
-	window.fill((0,0,0))
+	if (GameClass.frameCount % 100 == 0):
+		GameClass.frameCount = 0
+		GameClass.time += 1
 
-	game.draw.rect(window, (0, 255, 0), (playerX - 25, playerY - 25, playerH, playerW))
-	game.draw.rect(window, (180, 0, 0), (enemyX, enemyY, enemyH, enemyW))
+	GameClass.timestr = str(datetime.timedelta(seconds=GameClass.time))
+
+	if plr.CollideWithObject(bad, 84):
+		GameClass.run = False
+		while True:
+			menu.ScoreBoardLoop(GameClass.timestr)
+
+
+	if plr.CollideWithObject(power, 10):
+		plr.s += 5
+		power.on = False
+	if plr.CollideWithObject(power2, 10):
+		plr.s += 5
+		power2.on = False
+	if plr.CollideWithObject(power3, 10):
+		plr.s += 5
+		power3.on = False
+	if plr.CollideWithObject(power4, 10):
+		plr.s += 5
+		power4.on = False
+
+	if power.on:
+		power.Draw()
+	if power2.on:
+		power2.Draw()
+	if power3.on:
+		power3.Draw()
+	if power4.on:
+		power4.Draw()
+
+
+	plr.DrawObject()
+	bad.DrawObject()
+	GameClass.font.render_to(GameClass.window, ((1080/2) - 50, 20), GameClass.timestr, (255, 255, 255))
 
 	game.display.update()
 game.quit()
-
-```
-
-# Grade.v2.py
-```py
-import numpy as np
-import matplotlib.pyplot as plt
-
-
-#This function takes an int and returns a letter grade
-def letterGrade(score):
-    if score >= 90:
-        letter = 'A'
-    else:   # grade must be B, C, D or F
-        if score >= 80:
-            letter = 'B'
-        else:  # grade must be C, D or F
-            if score >= 70:
-                letter = 'C'
-            else:    # grade must D or F
-                if score >= 60:
-                    letter = 'D'
-                else:
-                    letter = 'F'
-    return letter
-
-#These variables are used in our while Loop
-
-GradeList = []
-
-#Loops through the
-print("When you are done entering grades, enter to continue.")
-while(True):
-
-    studentScore = input("What is the students grade: ")
-
-    if(not studentScore):
-        break
-
-    studentScoreInt = int(studentScore)
-    GradeList.append(studentScoreInt)
-
-    StudenGrade = letterGrade(studentScoreInt)
-
-    print("The student's grade is: " + StudenGrade)
-
-values = GradeList
-#this also overwrites the var(values) which makes what we enter meaning less
-#unless we comment out the line below
-#Example function to print a normal class bell curve
-#Last # is num of students (data points)
-#values = np.random.normal(50, 25, 67)
-
-
-input("Press Enter to generate Graph")
-plt.hist(values, 10)
-plt.show()
-```
-
-# Grade.py
-```py
-def letterGrade(score):
-    if score >= 90:
-        letter = 'A'
-    else:   # grade must be B, C, D or F
-        if score >= 80:
-            letter = 'B'
-        else:  # grade must be C, D or F
-            if score >= 70:
-                letter = 'C'
-            else:    # grade must D or F
-                if score >= 60:
-                    letter = 'D'
-                else:
-                    letter = 'F'
-    return letter
-
-studentScore = input()
-print("The student's grade is: " + letterGrade(studentScore))
-```
-
-
-# Prime.py 
-
-```py
-#in this example you see a for loop, this is a function that is built into python
-#It allows something to be run multiple times until some condition is met
-#This is a program that will list prime numbers in a range.
-
-
-
-lower = 900
-upper = 1000
-
-
-print("Prime numbers between",lower,"and",upper,"are:")
-
-for num in range(lower,upper + 1):
-   # prime numbers are greater than 1
-   if num > 1:
-       for i in range(2,num):
-           if (num % i) == 0:
-               break
-       else:
-           print(num)
 ```
